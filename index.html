@@ -1,1786 +1,297 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat Ops Academy - Military Training Tracker</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            color: #a3b8a1;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Color Palette */
-        :root {
-            --primary: #5a9d6f;
-            --primary-light: #7db88d;
-            --primary-dark: #3d6e50;
-            --secondary: #8b9d83;
-            --accent: #c9a066;
-            --bg-dark: #111827;
-            --bg-mid: #1f2937;
-            --bg-light: #374151;
-            --text-primary: #a3b8a1;
-            --text-secondary: #6b7280;
-            --text-light: #d1d5db;
-            --border: #4b5563;
-            --success: #6b9a6f;
-            --danger: #b85450;
-        }
-
-        /* Auth Container */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-        }
-
-        .auth-forms {
-            width: 100%;
-            max-width: 450px;
-        }
-
-        .auth-box {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-
-        .auth-box h1 {
-            text-align: center;
-            margin-bottom: 5px;
-            font-size: 24px;
-            color: var(--primary-light);
-        }
-
-        .auth-box .subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            margin-bottom: 30px;
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .auth-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .auth-tab-btn {
-            flex: 1;
-            padding: 12px;
-            background: transparent;
-            color: var(--text-secondary);
-            border: none;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .auth-tab-btn.active {
-            color: var(--primary-light);
-            border-bottom-color: var(--primary);
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(90, 157, 111, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .btn {
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            width: 100%;
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-light);
-            box-shadow: 0 8px 20px rgba(90, 157, 111, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--primary-light);
-            border: 1px solid var(--primary);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(90, 157, 111, 0.1);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #a84348;
-        }
-
-        .message {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-size: 12px;
-        }
-
-        .message.error {
-            background: rgba(184, 84, 80, 0.2);
-            color: #ff9a97;
-            border: 1px solid rgba(184, 84, 80, 0.4);
-        }
-
-        .message.success {
-            background: rgba(107, 154, 111, 0.2);
-            color: #9eff9a;
-            border: 1px solid rgba(107, 154, 111, 0.4);
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Main Dashboard */
-        .dashboard {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .dashboard.active {
-            display: block;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-left h1 {
-            font-size: 22px;
-            color: var(--primary-light);
-            margin-bottom: 3px;
-        }
-
-        .header-left p {
-            font-size: 10px;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .rank-display {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(90, 157, 111, 0.1);
-            padding: 12px 18px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-
-        .rank-display .rank-badge {
-            background: var(--primary);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 3px;
-            font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .rank-progress {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .progress-bar {
-            width: 120px;
-            height: 5px;
-            background: rgba(90, 157, 111, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            font-size: 9px;
-            color: var(--text-secondary);
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .menu-btn {
-            background: transparent;
-            color: var(--text-light);
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-        }
-
-        .menu-btn:hover {
-            background: rgba(90, 157, 111, 0.1);
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        .logout-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #a84348;
-        }
-
-        /* Tab Navigation */
-        .tab-navigation {
-            display: flex;
-            background: rgba(30, 41, 59, 0.6);
-            border-bottom: 1px solid var(--border);
-            gap: 0;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            background: transparent;
-            color: var(--text-secondary);
-            border: none;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-
-        .tab-btn:hover {
-            color: var(--primary-light);
-        }
-
-        .tab-btn.active {
-            color: var(--primary-light);
-            border-bottom-color: var(--primary);
-            background: rgba(90, 157, 111, 0.05);
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            padding: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-            animation: fadeIn 0.3s;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .tab-content h2 {
-            color: var(--primary-light);
-            margin-bottom: 5px;
-            font-size: 20px;
-        }
-
-        .tab-content h3 {
-            color: var(--primary-light);
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        /* Dashboard Overview */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(90, 157, 111, 0.08);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            border-color: var(--primary);
-            background: rgba(90, 157, 111, 0.12);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--primary-light);
-        }
-
-        /* Missions */
-        .missions-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .mission-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 20px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mission-card:hover {
-            border-color: var(--primary);
-            background: rgba(90, 157, 111, 0.1);
-        }
-
-        .mission-card.completed {
-            background: rgba(90, 157, 111, 0.08);
-            border-color: var(--primary);
-        }
-
-        .mission-card.completed::before {
-            content: '✓ COMPLETE';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-        }
-
-        .mission-type {
-            display: inline-block;
-            background: rgba(90, 157, 111, 0.2);
-            color: var(--primary-light);
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(90, 157, 111, 0.3);
-        }
-
-        .mission-type.daily {
-            background: rgba(139, 157, 131, 0.2);
-            color: var(--secondary);
-            border-color: rgba(139, 157, 131, 0.3);
-        }
-
-        .mission-type.weekly {
-            background: rgba(201, 160, 102, 0.2);
-            color: var(--accent);
-            border-color: rgba(201, 160, 102, 0.3);
-        }
-
-        .mission-type.learning {
-            background: rgba(100, 150, 180, 0.2);
-            color: #7db8d1;
-            border-color: rgba(100, 150, 180, 0.3);
-        }
-
-        .mission-title {
-            font-size: 15px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--text-light);
-        }
-
-        .mission-description {
-            color: var(--text-secondary);
-            font-size: 12px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .mission-reward {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            font-size: 11px;
-        }
-
-        .reward-item {
-            flex: 1;
-            background: rgba(90, 157, 111, 0.1);
-            border: 1px solid var(--border);
-            padding: 8px;
-            border-radius: 3px;
-            text-align: center;
-        }
-
-        .reward-value {
-            color: var(--primary-light);
-            font-weight: bold;
-        }
-
-        .mission-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .mission-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 10px;
-            transition: all 0.3s;
-        }
-
-        .complete-btn {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .complete-btn:hover:not(:disabled) {
-            background: var(--primary-light);
-        }
-
-        .complete-btn:disabled {
-            background: var(--text-secondary);
-            color: var(--bg-mid);
-            cursor: not-allowed;
-        }
-
-        .view-more-btn {
-            background: transparent;
-            color: var(--primary-light);
-            border: 1px solid var(--primary);
-        }
-
-        .view-more-btn:hover {
-            background: rgba(90, 157, 111, 0.2);
-        }
-
-        /* Learning Materials */
-        .learning-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .learning-item {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .learning-item:hover {
-            border-color: #7db8d1;
-            background: rgba(100, 150, 180, 0.1);
-        }
-
-        .learning-item.learned {
-            background: rgba(100, 150, 180, 0.08);
-            border-color: #7db8d1;
-        }
-
-        .learning-item h3 {
-            color: #7db8d1;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-
-        .learning-item p {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .learning-progress {
-            margin-bottom: 15px;
-        }
-
-        .progress-stages {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-
-        .stage-dot {
-            flex: 1;
-            height: 6px;
-            background: rgba(100, 150, 180, 0.2);
-            border-radius: 2px;
-            border: 1px solid rgba(100, 150, 180, 0.3);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .stage-dot.completed {
-            background: #7db8d1;
-            border-color: #7db8d1;
-        }
-
-        .stage-dot:hover {
-            transform: scaleY(1.3);
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        .checkbox-label input {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #7db8d1;
-        }
-
-        /* Achievements */
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-        }
-
-        .achievement {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s;
-            opacity: 0.5;
-        }
-
-        .achievement.unlocked {
-            background: rgba(201, 160, 102, 0.1);
-            border-color: var(--accent);
-            opacity: 1;
-            box-shadow: 0 4px 15px rgba(201, 160, 102, 0.15);
-        }
-
-        .achievement-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .achievement-name {
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--text-secondary);
-        }
-
-        .achievement.unlocked .achievement-name {
-            color: var(--accent);
-        }
-
-        /* Streaks */
-        .streak-container {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .streak-number {
-            font-size: 64px;
-            font-weight: bold;
-            color: var(--accent);
-            margin-bottom: 10px;
-        }
-
-        .streak-label {
-            color: var(--text-secondary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* Calendar */
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(90, 157, 111, 0.08);
-            border: 1px solid var(--border);
-            border-radius: 3px;
-            font-size: 11px;
-            cursor: default;
-            color: var(--text-secondary);
-        }
-
-        .calendar-day.completed {
-            background: var(--primary);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--primary);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 30px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content h2 {
-            color: var(--primary-light);
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .modal-content p {
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--danger);
-            border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .close-modal:hover {
-            background: #a84348;
-        }
-
-        /* Dropdown Menu */
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            min-width: 200px;
-            margin-top: 5px;
-        }
-
-        .dropdown-menu.active {
-            display: block;
-        }
-
-        .dropdown-item {
-            display: block;
-            width: 100%;
-            padding: 12px 16px;
-            background: transparent;
-            color: var(--text-light);
-            border: none;
-            text-align: left;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(90, 157, 111, 0.1);
-            color: var(--primary-light);
-            border-left-color: var(--primary);
-        }
-
-        .dropdown-item.danger {
-            color: #ff9a97;
-        }
-
-        .dropdown-item.danger:hover {
-            background: rgba(184, 84, 80, 0.1);
-            border-left-color: var(--danger);
-        }
-
-        /* Account Modal */
-        .account-modal-content {
-            color: var(--text-light);
-        }
-
-        .account-modal-content h3 {
-            color: var(--primary-light);
-            margin: 20px 0 15px 0;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        .account-modal-content .form-group {
-            margin-bottom: 15px;
-        }
-
-        .account-info {
-            background: rgba(90, 157, 111, 0.1);
-            border: 1px solid var(--border);
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-        .account-info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .account-info-row:last-child {
-            border-bottom: none;
-        }
-
-        .account-info-label {
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-
-        .account-info-value {
-            color: var(--primary-light);
-            font-weight: bold;
-        }
-
-        .danger-zone {
-            background: rgba(184, 84, 80, 0.08);
-            border: 1px solid rgba(184, 84, 80, 0.3);
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-
-        .danger-zone h4 {
-            color: var(--danger);
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-
-        .danger-zone p {
-            color: var(--text-secondary);
-            font-size: 11px;
-            margin-bottom: 12px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .button-group .btn {
-            flex: 1;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .missions-container, .learning-grid, .achievements-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .header-right {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .rank-display {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .header-buttons {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .menu-btn, .logout-btn {
-                width: 100%;
-            }
-
-            .tab-navigation {
-                flex-wrap: wrap;
-            }
-
-            .tab-btn {
-                font-size: 10px;
-                flex: 0 1 auto;
-            }
-
-            .tab-content {
-                padding: 15px;
-            }
-
-            .modal-content {
-                max-width: 90vw;
-                padding: 20px;
-            }
-
-            .dropdown-menu {
-                position: fixed;
-                top: auto;
-                left: 10px;
-                right: 10px;
-                width: auto;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tactical Mission Control</title>
+<style>
+body { margin:0; font-family:system-ui, sans-serif; background:#061116; color:#d8e1e8; }
+:root { --accent:#58c7ff; --accent2:#68ff9a; --panel:#0b1420; --panel-alt:#111f2f; --border:#18344d; --text:#d8e1e8; --muted:#86a5bf; }
+header { padding: 24px; background:linear-gradient(180deg, rgba(7,11,18,.98), rgba(8,18,28,1)); border-bottom:1px solid rgba(88,199,255,.14); display:flex; align-items:center; justify-content:space-between; }
+header h1 { margin:0; font-size:1.95rem; letter-spacing:.12rem; text-transform:uppercase; color:#d8e1e8; }
+.container { max-width:1200px; margin:0 auto; padding:20px; }
+.panel { background:rgba(8,14,22,.96); border:1px solid rgba(88,199,255,.12); border-radius:16px; padding:24px; margin-bottom:22px; box-shadow:0 18px 40px rgba(0,0,0,.25); }
+.section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.section-title h2 { margin:0; font-size:1.25rem; text-transform:uppercase; letter-spacing:.1rem; color:var(--accent2); }
+button, input[type=button], input[type=submit] { border:none; border-radius:10px; background:linear-gradient(135deg,#1c7cff,#32c2e4); color:#fff; padding:12px 18px; cursor:pointer; transition:.2s ease; box-shadow:0 12px 22px rgba(0,105,220,.22); }
+button:hover, input[type=button]:hover, input[type=submit]:hover { filter:brightness(1.08); transform:translateY(-1px); }
+input, select, textarea { width:100%; background:#0f1b2a; border:1px solid rgba(88,199,255,.12); color:#f5f8ff; padding:12px; border-radius:10px; margin-top:6px; margin-bottom:16px; }
+.checkbox-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+input[type=checkbox] { width:auto; margin-right:8px; accent-color:#58c7ff; }
+label { cursor:pointer; }
+.status-bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px; }
+.status-chip { padding:10px 16px; border-radius:999px; background:rgba(6,12,18,.92); border:1px solid rgba(88,199,255,.18); color:#c9e2ff; }
+.progress-bar { width:100%; height:16px; border-radius:14px; background:rgba(8,18,30,.9); overflow:hidden; border:1px solid rgba(88,199,255,.14); margin-top:10px; }
+.progress-fill { height:100%; background:linear-gradient(90deg,#58c7ff,#68ff9a); width:0%; transition:width .3s ease; }
+.hidden { display:none; }
+.tactical-title { color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; }
+.info-box { background:rgba(11,19,30,.95); border:1px solid rgba(88,199,255,.1); padding:18px; border-radius:14px; margin-bottom:16px; }
+.small-note { font-size:.95rem; color:var(--muted); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media(max-width:900px){ .grid-2 { grid-template-columns:1fr; } }
+.table-code { width:100%; border-collapse:collapse; margin-top:10px; }
+.table-code th, .table-code td { border:1px solid #17334a; padding:8px; text-align:left; }
+.table-code th { background:#102536; }
+.footer { text-align:center; font-size:.9rem; padding:10px 0; color:#7e99b2; }
+</style>
 </head>
 <body>
-    <!-- Authentication Screen -->
-    <div id="authContainer" class="auth-container">
-        <div class="auth-forms">
-            <div class="auth-box">
-                <h1>⚔ COMBAT OPS</h1>
-                <p class="subtitle">MILITARY TRAINING ACADEMY</p>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
-                    <button class="auth-tab-btn" onclick="switchAuthTab('signup')">CREATE ACCOUNT</button>
-                </div>
-
-                <!-- Login Form -->
-                <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
-                    <div id="loginError" class="message error" style="display: none;"></div>
-                    <div class="form-group">
-                        <label>SOLDIER ID</label>
-                        <input type="text" id="loginUsername" placeholder="Enter your soldier ID" required>
-                    </div>
-                    <div class="form-group">
-                        <label>ACCESS CODE</label>
-                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">ENTER COMMAND</button>
-                </form>
-
-                <!-- Signup Form -->
-                <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)">
-                    <div id="signupError" class="message error" style="display: none;"></div>
-                    <div id="signupSuccess" class="message success" style="display: none;"></div>
-                    <div class="form-group">
-                        <label>SOLDIER ID</label>
-                        <input type="text" id="signupUsername" placeholder="Choose your soldier ID (3+ chars)" minlength="3" required>
-                    </div>
-                    <div class="form-group">
-                        <label>ACCESS CODE</label>
-                        <input type="password" id="signupPassword" placeholder="Create a secure password" minlength="6" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CONFIRM ACCESS CODE</label>
-                        <input type="password" id="signupConfirm" placeholder="Confirm your password" minlength="6" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">CREATE ACCOUNT</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="dashboard">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1>⚔ COMBAT OPS ACADEMY</h1>
-                <p style="font-size: 11px; color: var(--text-secondary);">Mission Tracking System | Rank Progression</p>
-            </div>
-            <div class="header-right">
-                <div class="rank-display">
-                    <div class="rank-badge" id="rankBadge">RECRUIT</div>
-                    <div class="rank-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="rankProgressBar" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text" id="rankProgressText">0 / 100 XP</div>
-                    </div>
-                </div>
-                <div class="header-buttons" style="position: relative;">
-                    <button class="menu-btn" onclick="toggleAccountMenu()">⚙ ACCOUNT</button>
-                    <div id="accountMenu" class="dropdown-menu">
-                        <button class="dropdown-item" onclick="openAccountSettings()">View Profile</button>
-                        <button class="dropdown-item" onclick="openResetAccount()">Reset Progress</button>
-                        <button class="dropdown-item danger" onclick="openDeleteAccount()">Delete Account</button>
-                    </div>
-                    <button class="logout-btn" onclick="logout()">LOGOUT</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchTab('overview')">OVERVIEW</button>
-            <button class="tab-btn" onclick="switchTab('daily')">DAILY MISSIONS</button>
-            <button class="tab-btn" onclick="switchTab('weekly')">WEEKLY MISSIONS</button>
-            <button class="tab-btn" onclick="switchTab('learning')">LEARNING MATERIALS</button>
-            <button class="tab-btn" onclick="switchTab('achievements')">ACHIEVEMENTS</button>
-            <button class="tab-btn" onclick="switchTab('progress')">PROGRESS</button>
-        </div>
-
-        <!-- Tab Contents -->
-        <div class="tab-content active" id="overviewTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">MISSION OVERVIEW</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Total Missions</div>
-                    <div class="stat-value" id="totalMissions">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Completed Today</div>
-                    <div class="stat-value" id="completedToday">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Weekly Progress</div>
-                    <div class="stat-value" id="weeklyProgress">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total XP Earned</div>
-                    <div class="stat-value" id="totalXP">0</div>
-                </div>
-            </div>
-            <h3 style="margin: 30px 0 15px 0; text-shadow: 0 0 10px #00ff41;">TODAY'S PRIORITY MISSIONS</h3>
-            <div class="missions-container" id="priorityMissions"></div>
-        </div>
-
-        <div class="tab-content" id="dailyTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">DAILY MISSIONS</h2>
-            <div class="missions-container" id="dailyMissions"></div>
-        </div>
-
-        <div class="tab-content" id="weeklyTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">WEEKLY MISSIONS</h2>
-            <div class="missions-container" id="weeklyMissions"></div>
-        </div>
-
-        <div class="tab-content" id="learningTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">LEARNING MATERIALS</h2>
-            <div class="learning-grid" id="learningMaterials"></div>
-        </div>
-
-        <div class="tab-content" id="achievementsTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">ACHIEVEMENTS & BADGES</h2>
-            <div class="achievements-grid" id="achievementsList"></div>
-        </div>
-
-        <div class="tab-content" id="progressTab">
-            <h2 style="margin-bottom: 20px; text-shadow: 0 0 10px #00ff41;">PROGRESS TRACKING</h2>
-            <div class="streak-container">
-                <div class="streak-number" id="streakDisplay">0</div>
-                <div class="streak-label">🔥 Day Streak</div>
-            </div>
-            <h3 style="margin: 30px 0 15px 0; text-shadow: 0 0 10px #00ff41;">Last 30 Days</h3>
-            <div class="calendar" id="calendar"></div>
-        </div>
-    </div>
-
-    <!-- Modal for mission details -->
-    <div id="missionModal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal()">×</button>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-
-    <script>
-        // Data Structure
-        const MASTER_PASSWORD = "ranger";
-        const RANKS = [
-            { name: "RECRUIT", xpRequired: 0 },
-            { name: "PRIVATE", xpRequired: 100 },
-            { name: "PRIVATE FIRST CLASS", xpRequired: 250 },
-            { name: "CORPORAL", xpRequired: 450 },
-            { name: "SERGEANT", xpRequired: 700 },
-            { name: "STAFF SERGEANT", xpRequired: 1000 },
-            { name: "SERGEANT FIRST CLASS", xpRequired: 1350 },
-            { name: "MASTER SERGEANT", xpRequired: 1750 },
-            { name: "WARRANT OFFICER", xpRequired: 2200 },
-            { name: "CAPTAIN", xpRequired: 2700 },
-            { name: "MAJOR", xpRequired: 3250 },
-            { name: "COLONEL", xpRequired: 3850 },
-            { name: "GENERAL", xpRequired: 4500 }
-        ];
-
-        const DAILY_MISSIONS = [
-            { id: "d1", title: "Auditory Awareness Drill", description: "Close your eyes for 5 minutes and identify every sound within 50-meter radius. Name each sound aloud.", category: "Sensory Training", xp: 25 },
-            { id: "d2", title: "Physical Conditioning", description: "Complete 30 minutes of weighted carries or rucking. Progressive load increase.", category: "Body Hardening", xp: 50 },
-            { id: "d3", title: "Striking Practice", description: "Execute 50 explosive push-ups and 30 knuckle push-ups. Focus on form.", category: "Combat Training", xp: 40 },
-            { id: "d4", title: "Grip Strength Work", description: "Complete farmer's walks with heavy dumbbells for 3x30 seconds.", category: "Grip Training", xp: 30 },
-            { id: "d5", title: "Balance Training", description: "Single-leg blind balance for 2+ minutes each side.", category: "Proprioception", xp: 25 },
-            { id: "d6", title: "Breathing Control", description: "Practice pursed-lip exhales at maximum heart rate for 5 minutes.", category: "Resilience", xp: 20 },
-            { id: "d7", title: "Core Conditioning", description: "Complete 3x15 Russian twists, 3x12 weighted crunches, 2x30 sec planks.", category: "Body Hardening", xp: 35 },
-            { id: "d8", title: "Frequency Differentiation", description: "Train hearing test app for 10 minutes. Focus on subtle tonal shifts.", category: "Sensory Training", xp: 20 },
-            { id: "d9", title: "Cold Exposure", description: "Take a 2-minute cold shower or ice bath with progressive exposure.", category: "Resilience", xp: 25 },
-            { id: "d10", title: "Memorization Drill", description: "Memorize 50 random digits or a complete poem.", category: "Cognition", xp: 30 }
-        ];
-
-        const WEEKLY_MISSIONS = [
-            { id: "w1", title: "Echolocation Mastery", description: "Practice tongue-click echolocation in unfamiliar environments. Goal: Identify direction and distance within 2° accuracy.", category: "Sensory Training", xp: 75, days: 7 },
-            { id: "w2", title: "Shin & Bone Conditioning", description: "Roll wooden dowel over shins with progressive pressure + heavy bag kicks.", category: "Body Hardening", xp: 100, days: 7 },
-            { id: "w3", title: "Slacklining Session", description: "Progress from wide webbing to 1-inch webbing. Develop full-body tension regulation.", category: "Balance", xp: 80, days: 7 },
-            { id: "w4", title: "Muay Thai Study", description: "Learn Muay Thai elbow mechanics - angles, clinch entries, slashing vs crushing.", category: "Combat Training", xp: 90, days: 7 },
-            { id: "w5", title: "Climbing Gym Session", description: "Visit climbing gym and train toward V10 climbing goals. Work on technique.", category: "Strength", xp: 85, days: 7 },
-            { id: "w6", title: "Kali Grip Work", description: "Practice Filipino Kali grip manipulations for knife control, flow, and retention.", category: "Blade Work", xp: 70, days: 7 },
-            { id: "w7", title: "Throwing Accuracy", description: "Practice balanced throwing knife at 8-12 feet distance. 50 throws minimum.", category: "Blade Work", xp: 75, days: 7 },
-            { id: "w8", title: "Tactical Theory Study", description: "Study one section from Sun Tzu's Art of War or Clausewitz's On War.", category: "Tactical Knowledge", xp: 65, days: 7 },
-            { id: "w9", title: "Survival Skills Practice", description: "Practice one survival skill: fire building, water sourcing, shelter, or trapping.", category: "Survival", xp: 95, days: 7 },
-            { id: "w10", title: "Morse Code Training", description: "Practice Morse code transmission/reception toward 15+ WPM. Use LCWO.net.", category: "Communication", xp: 80, days: 7 }
-        ];
-
-        const LEARNING_MATERIALS = [
-            { id: "l1", title: "Sun Tzu - The Art of War", description: "Study the ancient Chinese military treatise on strategy and tactics.", stages: 5, category: "Military Theory" },
-            { id: "l2", title: "Clausewitz - On War", description: "Explore comprehensive military theory and the nature of conflict.", stages: 5, category: "Military Theory" },
-            { id: "l3", title: "Small Unit Tactics - Matthew Luke", description: "Learn modern small unit tactical procedures and operations.", stages: 4, category: "Tactical Skills" },
-            { id: "l4", title: "KUBARK Interrogation Manual", description: "Study declassified CIA interrogation techniques and methods.", stages: 3, category: "Interrogation" },
-            { id: "l5", title: "Visual Intelligence - Amy Herman", description: "Develop advanced observation and visual analysis skills.", stages: 4, category: "Observation" },
-            { id: "l6", title: "SAS Survival Handbook - Lofty Wiseman", description: "Master comprehensive survival skills and wilderness techniques.", stages: 5, category: "Survival" },
-            { id: "l7", title: "Memory Palaces (Method of Loci)", description: "Learn the ancient memory technique for encoding observations.", stages: 3, category: "Cognition" },
-            { id: "l8", title: "NATO Phonetic Alphabet", description: "Master complete NATO phonetic alphabet and brevity codes.", stages: 2, category: "Communication" },
-            { id: "l9", title: "PPCT System - Pressure Point Control Tactics", description: "Learn defensive compliance and pressure point targeting.", stages: 3, category: "Combat Training" },
-            { id: "l10", title: "AR-15 Weapon System Mastery", description: "Study AR-15 manipulation, immediate action, and transitions.", stages: 4, category: "Weapons" },
-            { id: "l11", title: "Brazilian Jiu-Jitsu Fundamentals", description: "Learn ground control, positional dominance, and submissions.", stages: 5, category: "Combat Training" },
-            { id: "l12", title: "Krav Maga Principles", description: "Study aggression, simultaneous defense/attack, vital targets.", stages: 4, category: "Combat Training" }
-        ];
-
-        const ACHIEVEMENTS = [
-            { id: "a1", name: "First Steps", description: "Complete your first daily mission", icon: "👣", xpRequired: 0 },
-            { id: "a2", name: "Week Warrior", description: "Complete 7 daily missions", icon: "⚔️", xpRequired: 150 },
-            { id: "a3", name: "Iron Body", description: "Complete all body hardening missions", icon: "💪", xpRequired: 200 },
-            { id: "a4", name: "Sensory Master", description: "Complete 5 sensory training missions", icon: "👁️", xpRequired: 100 },
-            { id: "a5", name: "Combat Ready", description: "Reach Sergeant rank", icon: "🎖️", xpRequired: 700 },
-            { id: "a6", name: "Tactical Genius", description: "Complete all tactical knowledge missions", icon: "🧠", xpRequired: 300 },
-            { id: "a7", name: "Blade Master", description: "Complete all blade work missions", icon: "🗡️", xpRequired: 150 },
-            { id: "a8", name: "Scholar", description: "Learn 5 different subjects", icon: "📚", xpRequired: 250 },
-            { id: "a9", name: "Elite Operative", description: "Reach Colonel rank", icon: "🏆", xpRequired: 3850 },
-            { id: "a10", name: "Legendary Commander", description: "Reach General rank", icon: "👑", xpRequired: 4500 }
-        ];
-
-        // State Management
-        let userData = {
-            username: "",
-            xp: 0,
-            completedMissions: {},
-            learnedTopics: {},
-            lastLoginDate: new Date().toDateString(),
-            createdDate: new Date().toDateString()
-        };
-
-        // Authentication
-        function switchAuthTab(tabName) {
-            document.querySelectorAll(".auth-form").forEach(form => form.classList.remove("active"));
-            document.querySelectorAll(".auth-tab-btn").forEach(btn => btn.classList.remove("active"));
-            
-            document.getElementById(tabName + "Form").classList.add("active");
-            event.target.classList.add("active");
-            
-            // Clear messages
-            document.getElementById("loginError").style.display = "none";
-            document.getElementById("signupError").style.display = "none";
-            document.getElementById("signupSuccess").style.display = "none";
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById("loginUsername").value.trim();
-            const password = document.getElementById("loginPassword").value;
-            const errorMsg = document.getElementById("loginError");
-
-            if (!username) {
-                showAuthError(errorMsg, "SOLDIER ID REQUIRED");
-                return;
-            }
-
-            const savedData = localStorage.getItem(`combat_ops_${username}`);
-            if (!savedData) {
-                showAuthError(errorMsg, "ACCOUNT NOT FOUND");
-                return;
-            }
-
-            const account = JSON.parse(savedData);
-            if (account.password !== btoa(password)) {
-                showAuthError(errorMsg, "INVALID ACCESS CODE");
-                return;
-            }
-
-            userData = account;
-            localStorage.setItem("combat_ops_lastUser", username);
-            document.getElementById("authContainer").style.display = "none";
-            document.getElementById("dashboard").classList.add("active");
-            initializeDashboard();
-        }
-
-        function handleSignup(event) {
-            event.preventDefault();
-            const username = document.getElementById("signupUsername").value.trim();
-            const password = document.getElementById("signupPassword").value;
-            const confirm = document.getElementById("signupConfirm").value;
-            const errorMsg = document.getElementById("signupError");
-            const successMsg = document.getElementById("signupSuccess");
-
-            errorMsg.style.display = "none";
-            successMsg.style.display = "none";
-
-            if (username.length < 3) {
-                showAuthError(errorMsg, "SOLDIER ID MUST BE 3+ CHARACTERS");
-                return;
-            }
-
-            if (password.length < 6) {
-                showAuthError(errorMsg, "PASSWORD MUST BE 6+ CHARACTERS");
-                return;
-            }
-
-            if (password !== confirm) {
-                showAuthError(errorMsg, "PASSWORDS DO NOT MATCH");
-                return;
-            }
-
-            if (localStorage.getItem(`combat_ops_${username}`)) {
-                showAuthError(errorMsg, "SOLDIER ID ALREADY EXISTS");
-                return;
-            }
-
-            // Create new account
-            const newAccount = {
-                username: username,
-                password: btoa(password),
-                xp: 0,
-                completedMissions: {},
-                learnedTopics: {},
-                createdDate: new Date().toISOString(),
-                lastLoginDate: new Date().toISOString()
-            };
-
-            localStorage.setItem(`combat_ops_${username}`, JSON.stringify(newAccount));
-            successMsg.textContent = "✓ ACCOUNT CREATED. PLEASE LOGIN.";
-            successMsg.style.display = "block";
-
-            setTimeout(() => {
-                document.getElementById("loginUsername").value = username;
-                document.getElementById("loginPassword").value = "";
-                switchAuthTab("login");
-            }, 1500);
-        }
-
-        function showAuthError(element, message) {
-            element.textContent = "⚠ " + message;
-            element.style.display = "block";
-        }
-
-        function logout() {
-            saveUserData();
-            document.getElementById("authContainer").style.display = "flex";
-            document.getElementById("dashboard").classList.remove("active");
-            document.getElementById("loginUsername").value = "";
-            document.getElementById("loginPassword").value = "";
-            document.getElementById("signupUsername").value = "";
-            document.getElementById("signupPassword").value = "";
-            document.getElementById("signupConfirm").value = "";
-            closeDropdownMenu();
-        }
-
-        // Data Persistence
-        function saveUserData() {
-            userData.lastLoginDate = new Date().toISOString();
-            localStorage.setItem(`combat_ops_${userData.username}`, JSON.stringify(userData));
-        }
-
-        function completeMission(missionId, type) {
-            const key = `${type}_${missionId}`;
-            if (!userData.completedMissions[key]) {
-                // Find mission to get XP
-                let xpGain = 0;
-                if (type === "daily") {
-                    xpGain = DAILY_MISSIONS.find(m => m.id === missionId)?.xp || 0;
-                } else if (type === "weekly") {
-                    xpGain = WEEKLY_MISSIONS.find(m => m.id === missionId)?.xp || 0;
-                }
-
-                userData.xp += xpGain;
-                userData.completedMissions[key] = new Date().toISOString();
-                saveUserData();
-                updateDashboard();
-                showNotification(`+${xpGain} XP GAINED!`);
-            }
-        }
-
-        function toggleLearned(materialId) {
-            if (!userData.learnedTopics[materialId]) {
-                userData.learnedTopics[materialId] = { stages: 0 };
-            }
-            const material = LEARNING_MATERIALS.find(m => m.id === materialId);
-            if (userData.learnedTopics[materialId].stages < material.stages) {
-                userData.learnedTopics[materialId].stages++;
-                userData.xp += 15;
-            }
-            saveUserData();
-            updateDashboard();
-        }
-
-        // UI Management
-        function switchTab(tabName) {
-            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-
-            document.getElementById(tabName + "Tab")?.classList.add("active");
-            event.target.classList.add("active");
-        }
-
-        function initializeDashboard() {
-            renderMissions();
-            renderLearning();
-            renderAchievements();
-            updateDashboard();
-            createCalendar();
-        }
-
-        function updateDashboard() {
-            // Update rank
-            const rank = getCurrentRank();
-            document.getElementById("rankBadge").textContent = rank.name;
-
-            // Update XP bar
-            const nextRank = RANKS[RANKS.indexOf(rank) + 1] || rank;
-            const xpInRank = userData.xp - rank.xpRequired;
-            const xpNeeded = nextRank.xpRequired - rank.xpRequired;
-            const percentage = Math.min(100, (xpInRank / xpNeeded) * 100);
-            document.getElementById("rankProgressBar").style.width = percentage + "%";
-            document.getElementById("rankProgressText").textContent = `${xpInRank} / ${xpNeeded} XP`;
-
-            // Update stats
-            document.getElementById("totalMissions").textContent = DAILY_MISSIONS.length + WEEKLY_MISSIONS.length;
-            document.getElementById("totalXP").textContent = userData.xp;
-
-            const today = new Date().toDateString();
-            const completedToday = Object.keys(userData.completedMissions).filter(key => {
-                const date = new Date(userData.completedMissions[key]).toDateString();
-                return date === today;
-            }).length;
-            document.getElementById("completedToday").textContent = completedToday;
-
-            const weeklyCompleted = Object.keys(userData.completedMissions).filter(key => key.startsWith("weekly_")).length;
-            const weeklyPercentage = Math.round((weeklyCompleted / WEEKLY_MISSIONS.length) * 100);
-            document.getElementById("weeklyProgress").textContent = weeklyPercentage + "%";
-
-            // Update streak
-            updateStreak();
-        }
-
-        function getCurrentRank() {
-            for (let i = RANKS.length - 1; i >= 0; i--) {
-                if (userData.xp >= RANKS[i].xpRequired) {
-                    return RANKS[i];
-                }
-            }
-            return RANKS[0];
-        }
-
-        function renderMissions() {
-            // Daily missions
-            let dailyHTML = "";
-            DAILY_MISSIONS.forEach(mission => {
-                const isCompleted = userData.completedMissions[`daily_${mission.id}`];
-                dailyHTML += createMissionCard(mission, "daily", isCompleted);
-            });
-            document.getElementById("dailyMissions").innerHTML = dailyHTML;
-
-            // Weekly missions
-            let weeklyHTML = "";
-            WEEKLY_MISSIONS.forEach(mission => {
-                const isCompleted = userData.completedMissions[`weekly_${mission.id}`];
-                weeklyHTML += createMissionCard(mission, "weekly", isCompleted);
-            });
-            document.getElementById("weeklyMissions").innerHTML = weeklyHTML;
-
-            // Priority missions (first 3 daily)
-            let priorityHTML = "";
-            DAILY_MISSIONS.slice(0, 3).forEach(mission => {
-                const isCompleted = userData.completedMissions[`daily_${mission.id}`];
-                priorityHTML += createMissionCard(mission, "daily", isCompleted);
-            });
-            document.getElementById("priorityMissions").innerHTML = priorityHTML;
-        }
-
-        function createMissionCard(mission, type, isCompleted) {
-            const buttonState = isCompleted ? "disabled" : "";
-            const buttonText = isCompleted ? "✓ COMPLETED" : "COMPLETE MISSION";
-            return `
-                <div class="mission-card ${isCompleted ? 'completed' : ''}">
-                    <div class="mission-type ${type}">${type.toUpperCase()}</div>
-                    <div class="mission-title">${mission.title}</div>
-                    <div class="mission-description">${mission.description}</div>
-                    <div class="mission-reward">
-                        <div class="reward-item">
-                            <div class="reward-value">+${mission.xp} XP</div>
-                            <div style="font-size: 10px; color: var(--text-secondary);">EXPERIENCE</div>
-                        </div>
-                        <div class="reward-item">
-                            <div class="reward-value">${mission.category}</div>
-                            <div style="font-size: 10px; color: var(--text-secondary);">CATEGORY</div>
-                        </div>
-                    </div>
-                    <div class="mission-actions">
-                        <button class="mission-btn complete-btn" ${buttonState} onclick="completeMission('${mission.id}', '${type}')">${buttonText}</button>
-                        <button class="mission-btn view-more-btn" onclick="showMissionDetails('${mission.id}', '${type}')">DETAILS</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderLearning() {
-            let html = "";
-            LEARNING_MATERIALS.forEach(material => {
-                const stages = userData.learnedTopics[material.id]?.stages || 0;
-                const isLearned = stages === material.stages;
-                html += `
-                    <div class="learning-item ${isLearned ? 'learned' : ''}">
-                        <h3>${material.title}</h3>
-                        <p>${material.description}</p>
-                        <div class="learning-progress">
-                            <div class="progress-stages">
-                                ${Array.from({length: material.stages}, (_, i) => `
-                                    <div class="stage-dot ${i < stages ? 'completed' : ''}" onclick="toggleLearned('${material.id}')"></div>
-                                `).join('')}
-                            </div>
-                            <div style="font-size: 11px; color: var(--text-secondary);">${stages} / ${material.stages} STAGES COMPLETE</div>
-                        </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" ${stages > 0 ? 'checked' : ''} onchange="toggleLearned('${material.id}')">
-                            Mark Progress
-                        </label>
-                    </div>
-                `;
-            });
-            document.getElementById("learningMaterials").innerHTML = html;
-        }
-
-        function renderAchievements() {
-            let html = "";
-            ACHIEVEMENTS.forEach(achievement => {
-                const isUnlocked = userData.xp >= achievement.xpRequired;
-                html += `
-                    <div class="achievement ${isUnlocked ? 'unlocked' : ''}">
-                        <div class="achievement-icon">${achievement.icon}</div>
-                        <div class="achievement-name">${achievement.name}</div>
-                        <div style="font-size: 10px; color: #666; margin-top: 5px;">${achievement.xpRequired} XP</div>
-                    </div>
-                `;
-            });
-            document.getElementById("achievementsList").innerHTML = html;
-        }
-
-        function updateStreak() {
-            const today = new Date();
-            let streak = 0;
-            for (let i = 0; i < 365; i++) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toDateString();
-                const hasCompletion = Object.keys(userData.completedMissions).some(key => {
-                    const missionDate = new Date(userData.completedMissions[key]).toDateString();
-                    return missionDate === dateStr;
-                });
-                if (hasCompletion) {
-                    streak++;
-                } else {
-                    break;
-                }
-            }
-            document.getElementById("streakDisplay").textContent = streak;
-        }
-
-        function createCalendar() {
-            const today = new Date();
-            const container = document.getElementById("calendar");
-            container.innerHTML = "";
-
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toDateString();
-                const hasCompletion = Object.keys(userData.completedMissions).some(key => {
-                    const missionDate = new Date(userData.completedMissions[key]).toDateString();
-                    return missionDate === dateStr;
-                });
-
-                const dayElement = document.createElement("div");
-                dayElement.className = `calendar-day ${hasCompletion ? 'completed' : ''}`;
-                dayElement.textContent = date.getDate();
-                dayElement.title = dateStr;
-                container.appendChild(dayElement);
-            }
-        }
-
-        function showMissionDetails(missionId, type) {
-            let mission;
-            if (type === "daily") {
-                mission = DAILY_MISSIONS.find(m => m.id === missionId);
-            } else {
-                mission = WEEKLY_MISSIONS.find(m => m.id === missionId);
-            }
-
-            const modal = document.getElementById("missionModal");
-            const body = document.getElementById("modalBody");
-            body.innerHTML = `
-                <h2>${mission.title}</h2>
-                <p style="margin: 15px 0; color: var(--text-secondary);">${mission.description}</p>
-                <div style="background: rgba(90, 157, 111, 0.1); border: 1px solid var(--border); padding: 15px; border-radius: 4px; margin: 15px 0;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div>
-                            <div style="color: var(--text-secondary); font-size: 11px;">EXPERIENCE REWARD</div>
-                            <div style="color: var(--primary-light); font-size: 20px; font-weight: bold;">+${mission.xp} XP</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); font-size: 11px;">CATEGORY</div>
-                            <div style="color: var(--primary-light); font-size: 16px;">${mission.category}</div>
-                        </div>
-                    </div>
-                </div>
-                <p style="color: var(--text-secondary); font-size: 12px; margin-top: 20px;"><strong>Mission Type:</strong> ${type.toUpperCase()}</p>
-            `;
-            modal.classList.add("active");
-        }
-
-        function closeModal() {
-            document.getElementById("missionModal").classList.remove("active");
-        }
-
-        function showNotification(text) {
-            const notification = document.createElement("div");
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: var(--primary);
-                color: #fff;
-                padding: 15px 25px;
-                border-radius: 4px;
-                font-weight: bold;
-                z-index: 2000;
-                animation: slideIn 0.3s ease-out;
-                box-shadow: 0 8px 20px rgba(90, 157, 111, 0.3);
-            `;
-            notification.textContent = text;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 2000);
-        }
-
-        // Account Management
-        function toggleAccountMenu() {
-            const menu = document.getElementById("accountMenu");
-            menu.classList.toggle("active");
-        }
-
-        function closeDropdownMenu() {
-            const menu = document.getElementById("accountMenu");
-            menu.classList.remove("active");
-        }
-
-        function openAccountSettings() {
-            const rank = getCurrentRank();
-            const createdDate = new Date(userData.createdDate).toLocaleDateString();
-            const lastLogin = new Date(userData.lastLoginDate).toLocaleDateString();
-            
-            document.getElementById("modalBody").innerHTML = `
-                <h2>SOLDIER PROFILE</h2>
-                <div class="account-modal-content">
-                    <div class="account-info">
-                        <div class="account-info-row">
-                            <span class="account-info-label">Soldier ID</span>
-                            <span class="account-info-value">${userData.username.toUpperCase()}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Current Rank</span>
-                            <span class="account-info-value">${rank.name}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Total XP</span>
-                            <span class="account-info-value">${userData.xp}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Missions Completed</span>
-                            <span class="account-info-value">${Object.keys(userData.completedMissions).length}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Topics Learned</span>
-                            <span class="account-info-value">${Object.keys(userData.learnedTopics).length}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Account Created</span>
-                            <span class="account-info-value">${createdDate}</span>
-                        </div>
-                        <div class="account-info-row">
-                            <span class="account-info-label">Last Login</span>
-                            <span class="account-info-value">${lastLogin}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById("missionModal").classList.add("active");
-            closeDropdownMenu();
-        }
-
-        function openResetAccount() {
-            document.getElementById("modalBody").innerHTML = `
-                <h2>RESET PROGRESS</h2>
-                <div class="account-modal-content">
-                    <p style="margin-bottom: 20px;">This action will reset all your mission progress and learning status. Your rank and XP will be reset to zero. You will keep your account and soldier ID.</p>
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="closeModal()">CANCEL</button>
-                        <button class="btn btn-danger" onclick="confirmResetAccount()">CONFIRM RESET</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById("missionModal").classList.add("active");
-            closeDropdownMenu();
-        }
-
-        function confirmResetAccount() {
-            userData.xp = 0;
-            userData.completedMissions = {};
-            userData.learnedTopics = {};
-            saveUserData();
-            updateDashboard();
-            renderMissions();
-            renderLearning();
-            renderAchievements();
-            createCalendar();
-            closeModal();
-            showNotification("✓ PROGRESS RESET COMPLETE");
-        }
-
-        function openDeleteAccount() {
-            document.getElementById("modalBody").innerHTML = `
-                <h2>DELETE ACCOUNT</h2>
-                <div class="account-modal-content">
-                    <div class="danger-zone">
-                        <h4>⚠ DANGER ZONE</h4>
-                        <p>This action is PERMANENT and IRREVERSIBLE. Your account and all associated data will be permanently deleted.</p>
-                        <p><strong>Account to delete: ${userData.username}</strong></p>
-                        <div class="button-group">
-                            <button class="btn btn-secondary" onclick="closeModal()">CANCEL</button>
-                            <button class="btn btn-danger" onclick="confirmDeleteAccount()">DELETE PERMANENTLY</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById("missionModal").classList.add("active");
-            closeDropdownMenu();
-        }
-
-        function confirmDeleteAccount() {
-            const username = userData.username;
-            localStorage.removeItem(`combat_ops_${username}`);
-            localStorage.removeItem("combat_ops_lastUser");
-            userData = {
-                username: "",
-                xp: 0,
-                completedMissions: {},
-                learnedTopics: {},
-                createdDate: new Date().toISOString(),
-                lastLoginDate: new Date().toISOString()
-            };
-            logout();
-            showNotification("✓ ACCOUNT DELETED");
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById("missionModal");
-            if (event.target === modal) {
-                modal.classList.remove("active");
-            }
-        }
-
-        // Initialize on load
-        window.addEventListener("load", () => {
-            const savedUser = localStorage.getItem("combat_ops_lastUser");
-            if (savedUser && savedUser !== "") {
-                document.getElementById("usernameInput").value = savedUser;
-            }
-        });
-    </script>
+<header>
+<div>
+<h1>Tactical Mission Control</h1>
+<div class="small-note">Daily mental, physical, and combat readiness toolbox</div>
+</div>
+<div class="status-chip" id="userBadge">No account</div>
+</header>
+<div class="container">
+<div class="panel" id="authPanel">
+<div class="section-title"><h2>Access Protocol</h2></div>
+<div class="info-box">
+<p class="tactical-title">Operator authentication</p>
+<label>Secret code</label><input type="password" id="secretInput" placeholder="Enter the mission code">
+<button id="secretSignin">Initiate access</button>
+</div>
+</div>
+<div class="panel hidden" id="dashboard">
+<div class="section-title">
+<h2>Mission dashboard</h2>
+<div>
+<span class="status-chip" id="rankLabel">Rank: Recruit</span>
+<span class="status-chip" id="xpLabel">XP: 0</span>
+</div>
+</div>
+<div class="info-box">
+<div id="welcomeText">Welcome, operator.</div>
+<div class="progress-bar"><div class="progress-fill" id="rankProgress"></div></div>
+<div class="small-note" id="progressNote">Earn XP by completing missions. Progress saves locally.</div>
+<div class="status-bar">
+<button id="signOutBtn">Sign out</button>
+<button id="restartBtn">Restart progress</button>
+</div>
+</div>
+<div class="panel">
+<div class="section-title"><h2>Morning Missions</h2></div>
+<div class="info-box">
+<p class="tactical-title">Digit memory drill</p>
+<button id="generateDigitsBtn">Generate 50 random digits</button>
+<div id="digitDisplay" class="small-note"></div>
+<label>Type the digits from memory</label><input type="text" id="digitMemoryInput" placeholder="Enter 50 digits">
+<button id="checkDigitsBtn">Submit recall</button>
+<div class="small-note" id="digitResult"></div>
+</div>
+<div class="info-box">
+<p class="tactical-title">Hearing and frequency differentiation</p>
+<button id="playLowTone">Play low tone</button>
+<button id="playHighTone">Play high tone</button>
+<div class="small-note">Listen and then identify whether the hidden tone sequence is higher or lower.</div>
+<button id="startFreqTest">Start frequency test</button>
+<div class="status-bar">
+<button id="guessLow">Guess lower</button>
+<button id="guessHigh">Guess higher</button>
+</div>
+<div class="small-note" id="freqResult"></div>
+</div>
+</div>
+<div class="panel">
+<div class="section-title"><h2>Language and memory training</h2></div>
+<div class="info-box">
+<p class="tactical-title">Duolingo language checklist</p>
+<div class="checkbox-grid" id="duolingoList"></div>
+</div>
+<div class="info-box">
+<p class="tactical-title">Morse code & NATO alphabet</p>
+<div class="grid-2">
+<div>
+<table class="table-code">
+<thead><tr><th>Morse</th><th>Letter</th></tr></thead>
+<tbody id="morseTable"></tbody>
+</table>
+</div>
+<div>
+<table class="table-code">
+<thead><tr><th>NATO</th><th>Code</th></tr></thead>
+<tbody id="natoTable"></tbody>
+</table>
+</div>
+</div>
+<div class="small-note">Review this daily. Check the box when you can recite both from memory.</div>
+<label><input type="checkbox" data-task="morseNATO"> I can recite Morse and NATO alphabet from memory</label>
+</div>
+</div>
+<div class="panel">
+<div class="section-title"><h2>Before Sleep Missions</h2></div>
+<div class="info-box">
+<p class="tactical-title">Sound identification session</p>
+<button id="startSoundSession">Start 5-minute listening</button>
+<div class="small-note">Close your eyes, listen carefully, then report every sound you heard.</div>
+<textarea id="soundLog" rows="5" placeholder="Write every sound you heard after the session."></textarea>
+<button id="saveSoundLog">Save report</button>
+</div>
+<div class="info-box">
+<p class="tactical-title">Box breathing guide</p>
+<div id="boxBreathingText" class="small-note">Ready to begin a controlled breathing cycle.</div>
+<button id="startBreathing">Start box breathing</button>
+<button id="stopBreathing">Stop</button>
+</div>
+<div class="info-box">
+<p class="tactical-title">Balance drill</p>
+<div class="status-bar"><button id="startLeftBalance">Left leg 2 min</button><button id="startRightBalance">Right leg 2 min</button><button id="resetBalance">Restart timer</button></div>
+<div class="small-note" id="balanceTimerLabel">Use eyes closed and maintain posture. Start one leg at a time.</div>
+</div>
+</div>
+<div class="panel">
+<div class="section-title"><h2>Combat Missions</h2></div>
+<div class="info-box">
+<p class="tactical-title">Saturday Training</p>
+<ul>
+<li>Forearms, stomach, fists, shins, ankles, feet durability conditioning: heavy bag + stick striking.</li>
+<li>Kali knife grip practice and pencil/knife throwing mechanics.</li>
+<li>Gun fundamentals: how it works, safe handling, maintenance, marksmanship concepts.</li>
+</ul>
+</div>
+<div class="info-box">
+<p class="tactical-title">Sunday Training</p>
+<ul>
+<li>Boxing + Muay Thai training.</li>
+<li>Krav Maga tactical flow.</li>
+<li>BJJ swap: rotate weekly between boxing/Muay Thai, Krav Maga, BJJ.</li>
+</ul>
+</div>
+<div class="info-box">
+<div class="checkbox-grid">
+<label><input type="checkbox" data-task="satDurability">Saturday durability conditioning</label>
+<label><input type="checkbox" data-task="kaliKnife">Kali knife grip practice</label>
+<label><input type="checkbox" data-task="gunFundamentals">Gun fundamentals overview</label>
+<label><input type="checkbox" data-task="boxingMuaythai">Sunday boxing and Muay Thai</label>
+<label><input type="checkbox" data-task="kravBJJ">Krav Maga / BJJ weekly swap</label>
+</div>
+</div>
+</div>
+<div class="panel">
+<div class="section-title"><h2>Study Missions</h2></div>
+<div class="info-box">
+<div class="checkbox-grid">
+<label><input type="checkbox" data-task="tongueEcholocation">Tongue clicking echolocation</label>
+<label><input type="checkbox" data-task="artOfWar">Study Sun Tzu: Art of War</label>
+<label><input type="checkbox" data-task="clausewitz">Study Clausewitz on War</label>
+<label><input type="checkbox" data-task="kubark">Read KUBARK interrogation manual</label>
+<label><input type="checkbox" data-task="visualIntelligence">Read Visual Intelligence by Amy Herman</label>
+<label><input type="checkbox" data-task="sasSurvival">Read SAS Survival Handbook</label>
+<label><input type="checkbox" data-task="memoryPalaces">Practice Memory Palaces</label>
+</div>
+</div>
+<div class="info-box">
+<p class="tactical-title">Optional training</p>
+<div class="checkbox-grid">
+<label><input type="checkbox" data-task="climbingTechniques">Climbing techniques</label>
+<label><input type="checkbox" data-task="parkourTechniques">Parkour techniques</label>
+<label><input type="checkbox" data-task="workoutsDrills">Workouts and drills</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+const ranks = [
+{label:'Recruit', xp:0},
+{label:'Private', xp:100},
+{label:'Corporal', xp:250},
+{label:'Sergeant', xp:500},
+{label:'Lieutenant', xp:900},
+{label:'Captain', xp:1400},
+{label:'Major', xp:2000},
+{label:'Colonel', xp:2800},
+{label:'General', xp:3800}
+];
+const tasks = {
+morseNATO:5, satDurability:10, kaliKnife:10, gunFundamentals:10,
+boxingMuaythai:10, kravBJJ:10, tongueEcholocation:5, artOfWar:5,
+clausewitz:5, kubark:5, visualIntelligence:5, sasSurvival:5,
+memoryPalaces:5, climbingTechniques:5, parkourTechniques:5, workoutsDrills:5
+};
+const duolingoLanguages = [
+'Afrikaans','Albanian','Arabic','Armenian','Azerbaijani','Bengali','Bulgarian','Catalan','Cantonese','Chinese',
+'Croatian','Czech','Danish','Dutch','Esperanto','Estonian','Filipino','Finnish','French','German',
+'Greek','Gujarati','Hawaiian','Hebrew','Hindi','Hungarian','Icelandic','Indonesian','Irish','Italian',
+'Japanese','Kannada','Korean','Latin','Luxembourgish','Malay','Marathi','Norwegian','Persian','Polish',
+'Portuguese','Punjabi','Romanian','Russian','ScottishGaelic','Spanish','Swahili','Swedish','Tamil','Telugu',
+'Thai','Turkish','Ukrainian','Urdu','Vietnamese','Welsh','Zulu'
+];
+const morseMap = {
+'A':'.-', 'B':'-...', 'C':'-.-.', 'D':'-..', 'E':'.', 'F':'..-.',
+'G':'--.', 'H':'....', 'I':'..', 'J':'.---', 'K':'-.-', 'L':'.-..',
+'M':'--', 'N':'-.', 'O':'---', 'P':'.--.', 'Q':'--.-', 'R':'.-.',
+'S':'...', 'T':'-', 'U':'..-', 'V':'...-', 'W':'.--', 'X':'-..-',
+'Y':'-.--', 'Z':'--..', '1':'.----', '2':'..---', '3':'...--', '4':'....-',
+'5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.', '0':'-----'
+};
+const natoMap = {
+'A':'Alfa','B':'Bravo','C':'Charlie','D':'Delta','E':'Echo','F':'Foxtrot',
+'G':'Golf','H':'Hotel','I':'India','J':'Juliett','K':'Kilo','L':'Lima',
+'M':'Mike','N':'November','O':'Oscar','P':'Papa','Q':'Quebec','R':'Romeo',
+'S':'Sierra','T':'Tango','U':'Uniform','V':'Victor','W':'Whiskey',
+'X':'Xray','Y':'Yankee','Z':'Zulu'
+};
+let profile = null;
+let signedIn = false;
+let currentDigits = '';
+let currentFreqAnswer = null;
+let breathTimer = null;
+let balanceTimer = null;
+let soundSessionTimer = null;
+function loadData(){ const stored = JSON.parse(localStorage.getItem('missionControlProfile')||'null'); if(stored){ profile=stored; signedIn=!!stored.signedIn; } else { profile={ displayName:'Operator', xp:0, progress:{}, soundLog:'', signedIn:false }; }}
+function saveData(){ if(!profile) return; localStorage.setItem('missionControlProfile', JSON.stringify(profile)); }
+function ensureProfile(){ if(!profile){ profile={ displayName:'Operator', xp:0, progress:{}, soundLog:'', signedIn:false }; }
+ if(!profile.progress) profile.progress={};
+ if(typeof profile.xp !== 'number') profile.xp=0;
+ if(typeof profile.soundLog !== 'string') profile.soundLog='';
+ }
+function getCurrentUser(){ return signedIn ? profile : null; }
+function addXp(amount){ const user = getCurrentUser(); if(!user) return; user.xp = Math.max(0, user.xp + amount); saveData(); updateDashboard(); }
+function updateDashboard(){ const user = getCurrentUser(); if(!user) return; document.getElementById('welcomeText').textContent = `Welcome, ${user.displayName}`; const rank = ranks.slice().reverse().find(r=>user.xp>=r.xp) || ranks[0]; const next = ranks.find(r=>r.xp>rank.xp); const nextThreshold = next ? next.xp : rank.xp; const progress = next ? Math.min(100, Math.round((user.xp - rank.xp)/(nextThreshold - rank.xp)*100)) : 100; document.getElementById('rankLabel').textContent = `Rank: ${rank.label}`; document.getElementById('xpLabel').textContent = `XP: ${user.xp}`; document.getElementById('progressNote').textContent = next ? `Advance to ${next.label} at ${nextThreshold} XP` : 'Max rank achieved.'; document.getElementById('rankProgress').style.width = `${progress}%`; document.getElementById('userBadge').textContent = `${rank.label}`; }
+function syncCheckboxes(){ const user = getCurrentUser(); if(!user) return; document.querySelectorAll('input[type=checkbox][data-task]').forEach(el=>{ el.checked = !!user.progress[el.dataset.task]; }); document.getElementById('soundLog').value = user.soundLog || ''; }
+function updateTask(key, value){ const user = getCurrentUser(); if(!user) return; ensureProfile(); const previous = !!user.progress[key]; user.progress[key] = value; if(value && !previous){ addXp(tasks[key] || 5); } saveData(); }
+function handleCheckbox(e){ updateTask(e.target.dataset.task, e.target.checked); }
+function showDashboard(){ document.getElementById('authPanel').classList.add('hidden'); document.getElementById('dashboard').classList.remove('hidden'); }
+function showAuth(){ document.getElementById('dashboard').classList.add('hidden'); document.getElementById('authPanel').classList.remove('hidden'); document.getElementById('userBadge').textContent = 'No account'; }
+function loadUI(){ loadData(); ensureProfile(); if(signedIn){ updateDashboard(); showDashboard(); syncCheckboxes(); } else { showAuth(); } }
+function signInSecret(){ const secret = document.getElementById('secretInput').value.trim(); if(secret !== 'turtle'){ alert('Access denied. Wrong mission code.'); return; } ensureProfile(); signedIn = true; profile.signedIn = true; saveData(); updateDashboard(); syncCheckboxes(); showDashboard(); }
+function signOut(){ signedIn = false; if(profile){ profile.signedIn = false; saveData(); } showAuth(); }
+function restartProgress(){ ensureProfile(); profile.progress = {}; profile.xp = 0; profile.soundLog = ''; saveData(); syncCheckboxes(); updateDashboard(); }
+function buildDuolingoList(){ const container = document.getElementById('duolingoList'); duolingoLanguages.forEach(lang=>{ const id = `duo_${lang.replace(/[^a-zA-Z0-9]/g,'')}`; tasks[id] = 5; const label = document.createElement('label'); label.innerHTML = `<input type="checkbox" data-task="${id}"> ${lang}`; container.appendChild(label); }); }
+function buildCodeTables(){ const morseBody = document.getElementById('morseTable'); Object.entries(morseMap).forEach(([letter, code])=>{ const row = document.createElement('tr'); row.innerHTML = `<td>${code}</td><td>${letter}</td>`; morseBody.appendChild(row); }); const natoBody = document.getElementById('natoTable'); Object.entries(natoMap).forEach(([letter, code])=>{ const row = document.createElement('tr'); row.innerHTML = `<td>${letter}</td><td>${code}</td>`; natoBody.appendChild(row); }); }
+function generateDigits(){ currentDigits = Array.from({length:50},()=>Math.floor(Math.random()*10)).join(''); document.getElementById('digitDisplay').textContent = currentDigits; document.getElementById('digitResult').textContent = 'Memorize and then hide the digits. Enter what you recall.'; setTimeout(()=>{ document.getElementById('digitDisplay').textContent = '[hidden]'; }, 20000); }
+function checkDigitMemory(){ const answer = document.getElementById('digitMemoryInput').value.replace(/\s+/g,''); const result = document.getElementById('digitResult'); if(!currentDigits){ result.textContent = 'Generate digits first.'; return; } if(answer===currentDigits){ result.textContent = 'Correct. Digit memory mastered.'; updateTask('morningDigits',true); } else { result.textContent = 'Not exact. Practice again.'; updateTask('morningDigits',false); } }
+function createAudioTone(freq){ const context = new (window.AudioContext||window.webkitAudioContext)(); const osc = context.createOscillator(); const gain = context.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(freq,context.currentTime); osc.connect(gain); gain.connect(context.destination); gain.gain.setValueAtTime(0.08, context.currentTime); osc.start(); osc.stop(context.currentTime+1.2); }
+function startFreqTest(){ if(Math.random()<0.5){ currentFreqAnswer='low'; createAudioTone(330); } else { currentFreqAnswer='high'; createAudioTone(880); } document.getElementById('freqResult').textContent = 'Listening... choose lower or higher after the tone.'; }
+function answerFreq(guess){ const result = document.getElementById('freqResult'); if(!currentFreqAnswer){ result.textContent = 'Start the test first.'; return; } if(guess===currentFreqAnswer){ result.textContent = 'Correct frequency differentiation.'; updateTask('frequencyTest',true); } else { result.textContent = 'Incorrect. Train hearing again.'; updateTask('frequencyTest',false); } currentFreqAnswer = null; }
+function runBoxBreathing(){ const phases = ['Inhale','Hold','Exhale','Hold']; const duration = 4000; let index = 0; const display = document.getElementById('boxBreathingText'); clearInterval(breathTimer); display.textContent = 'Ready to begin box breathing.'; breathTimer = setInterval(()=>{ display.textContent = `${phases[index]} for 4 seconds.`; index = (index+1)%phases.length; }, duration); }
+function stopBreathing(){ clearInterval(breathTimer); document.getElementById('boxBreathingText').textContent = 'Box breathing stopped.'; }
+function startBalance(leg){ clearInterval(balanceTimer); let seconds = 120; const label = document.getElementById('balanceTimerLabel'); label.textContent = `Balancing on ${leg} leg: ${seconds} seconds remaining.`; balanceTimer = setInterval(()=>{ seconds--; if(seconds<=0){ clearInterval(balanceTimer); label.textContent = `${leg} balance complete. Restart if needed.`; updateTask(`${leg}Balance`,true); return; } label.textContent = `Balancing on ${leg} leg: ${seconds} seconds remaining.`; }, 1000); }
+function resetBalance(){ clearInterval(balanceTimer); document.getElementById('balanceTimerLabel').textContent = 'Timers reset. Start again for each leg.'; }
+function startSoundSession(){ clearInterval(soundSessionTimer); let seconds = 300; const log = document.getElementById('soundLog'); log.placeholder = 'Eyes closed. Listen for every sound for 5 minutes. Then write them down.'; log.value = ''; soundSessionTimer = setInterval(()=>{ seconds--; if(seconds<=0){ clearInterval(soundSessionTimer); log.placeholder = 'Session complete. Describe every sound you heard.'; return; } }, 1000); }
+function saveSoundLog(){ const user = getCurrentUser(); if(!user) return; user.soundLog = document.getElementById('soundLog').value; updateTask('soundReport', !!user.soundLog.trim()); }
+document.getElementById('secretSignin').addEventListener('click', signInSecret);
+document.getElementById('signOutBtn').addEventListener('click', signOut);
+document.getElementById('restartBtn').addEventListener('click', ()=>{ if(confirm('Restart all progress?')) restartProgress(); });
+document.getElementById('generateDigitsBtn').addEventListener('click', generateDigits);
+document.getElementById('checkDigitsBtn').addEventListener('click', checkDigitMemory);
+document.getElementById('startFreqTest').addEventListener('click', startFreqTest);
+document.getElementById('guessLow').addEventListener('click', ()=>answerFreq('low'));
+document.getElementById('guessHigh').addEventListener('click', ()=>answerFreq('high'));
+document.getElementById('playLowTone').addEventListener('click', ()=>createAudioTone(330));
+document.getElementById('playHighTone').addEventListener('click', ()=>createAudioTone(880));
+document.getElementById('startBreathing').addEventListener('click', runBoxBreathing);
+document.getElementById('stopBreathing').addEventListener('click', stopBreathing);
+document.getElementById('startLeftBalance').addEventListener('click', ()=>startBalance('left'));
+document.getElementById('startRightBalance').addEventListener('click', ()=>startBalance('right'));
+document.getElementById('resetBalance').addEventListener('click', resetBalance);
+document.getElementById('startSoundSession').addEventListener('click', startSoundSession);
+document.getElementById('saveSoundLog').addEventListener('click', saveSoundLog);
+buildDuolingoList();
+buildCodeTables();
+attachCheckboxListeners();
+loadUI();
+</script>
 </body>
 </html>
